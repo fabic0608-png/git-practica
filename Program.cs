@@ -1,74 +1,97 @@
 ﻿using System;
 
-class Dado
+class Persona
 {
-    private int valor;
-    private static Random aleatorio = new Random();
+    public string Nombre { get; set; }
+    public int Edad { get; set; }
 
-    public Dado()
+    public Persona(string nombre, int edad)
     {
-        valor = 0;
-    }
-
-    public void Tirar()
-    {
-        valor = aleatorio.Next(1, 7);
-    }
-
-    public void Imprimir()
-    {
-        Console.WriteLine("Valor del dado: " + valor);
-    }
-
-    public int RetornarValor()
-    {
-        return valor;
+        Nombre = nombre;
+        Edad = edad;
     }
 }
 
-class JuegoDeDados
+class Cuenta
 {
-    private Dado dado1;
-    private Dado dado2;
-    private Dado dado3;
+    protected Persona titular;
+    protected double cantidad;
 
-    public JuegoDeDados()
+    public Cuenta(Persona titular, double cantidad)
     {
-        dado1 = new Dado();
-        dado2 = new Dado();
-        dado3 = new Dado();
+        this.titular = titular;
+        this.cantidad = cantidad;
     }
 
-    public void Jugar()
+    public virtual void Retirar(double monto)
     {
-        dado1.Tirar();
-        dado2.Tirar();
-        dado3.Tirar();
+        cantidad -= monto;
+    }
 
-        dado1.Imprimir();
-        dado2.Imprimir();
-        dado3.Imprimir();
+    public virtual void Mostrar()
+    {
+        Console.WriteLine("Titular: " + titular.Nombre);
+        Console.WriteLine("Cantidad: $" + cantidad);
+    }
+}
 
-        if (dado1.RetornarValor() == dado2.RetornarValor() &&
-            dado2.RetornarValor() == dado3.RetornarValor())
+class CuentaJoven : Cuenta
+{
+    private double bonificacion;
+
+    public CuentaJoven(Persona titular, double cantidad, double bonificacion)
+        : base(titular, cantidad)
+    {
+        this.bonificacion = bonificacion;
+    }
+
+    public double Bonificacion
+    {
+        get { return bonificacion; }
+        set { bonificacion = value; }
+    }
+
+    public bool EsTitularValido()
+    {
+        return titular.Edad >= 18 && titular.Edad < 25;
+    }
+
+    public override void Retirar(double monto)
+    {
+        if (EsTitularValido())
         {
-            Console.WriteLine("¡Ganó!");
+            cantidad -= monto;
+            Console.WriteLine("Retiro realizado.");
         }
         else
         {
-            Console.WriteLine("Perdió");
+            Console.WriteLine("No puede retirar dinero. Titular no válido.");
         }
+    }
+
+    public override void Mostrar()
+    {
+        Console.WriteLine("Cuenta Joven");
+        Console.WriteLine("Titular: " + titular.Nombre);
+        Console.WriteLine("Cantidad: $" + cantidad);
+        Console.WriteLine("Bonificación: " + bonificacion + "%");
     }
 }
 
-class program
+class Program
 {
     static void Main(string[] args)
     {
-        JuegoDeDados juego = new JuegoDeDados();
-        juego.Jugar();
+        Persona p = new Persona("Fabiana", 20);
+
+        CuentaJoven cuenta = new CuentaJoven(p, 1000, 10);
+
+        cuenta.Mostrar();
+
+        cuenta.Retirar(200);
+
+        cuenta.Mostrar();
 
         Console.ReadKey();
     }
 }
-
